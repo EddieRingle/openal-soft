@@ -67,25 +67,25 @@ static const union {
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
-typedef DWORD pthread_key_t;
-int pthread_key_create(pthread_key_t *key, void (*callback)(void*));
-int pthread_key_delete(pthread_key_t key);
-void *pthread_getspecific(pthread_key_t key);
-int pthread_setspecific(pthread_key_t key, void *val);
+typedef DWORD althread_key_t;
+int althread_key_create(althread_key_t *key, void (*callback)(void*));
+int althread_key_delete(althread_key_t key);
+void *althread_getspecific(althread_key_t key);
+int althread_setspecific(althread_key_t key, void *val);
 
 #define HAVE_DYNLOAD 1
 void *LoadLib(const char *name);
 void CloseLib(void *handle);
 void *GetSymbol(void *handle, const char *name);
 
-WCHAR *strdupW(const WCHAR *str);
+typedef LONG althread_once_t;
+#define ALTHREAD_ONCE_INIT 0
+void althread_once(althread_once_t *once, void (*callback)(void));
 
-typedef LONG pthread_once_t;
-#define PTHREAD_ONCE_INIT 0
-void pthread_once(pthread_once_t *once, void (*callback)(void));
-
-static __inline int sched_yield(void)
+static inline int alsched_yield(void)
 { SwitchToThread(); return 0; }
+
+WCHAR *strdupW(const WCHAR *str);
 
 #else
 
@@ -106,6 +106,18 @@ void LeaveCriticalSection(CRITICAL_SECTION *cs);
 
 ALuint timeGetTime(void);
 void Sleep(ALuint t);
+
+#define althread_key_t pthread_key_t
+#define althread_key_create pthread_key_create
+#define althread_key_delete pthread_key_delete
+#define althread_getspecific pthread_getspecific
+#define althread_setspecific pthread_setspecific
+
+#define althread_once_t pthread_once_t
+#define ALTHREAD_ONCE_INIT PTHREAD_ONCE_INIT
+#define althread_once pthread_once
+
+#define alsched_yield sched_yield
 
 #if defined(HAVE_DLFCN_H)
 #define HAVE_DYNLOAD 1
